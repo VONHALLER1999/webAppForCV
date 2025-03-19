@@ -1,24 +1,34 @@
 from flask import Flask, request, jsonify
-import yfinance as yf
+import requests
 from flask_cors import CORS
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
-# Enable CORS to allow requests from your React app
-CORS(app)
+CORS(app)  # Enable CORS to allow requests from your React app
+
+ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY')
 
 @app.route('/api/fetch', methods=['POST'])
 def fetch_stock():
-    # Get JSON data from the request
     data = request.get_json()
     ticker_symbol = data.get('ticker', 'AAPL')
     
-    # Fetch stock data using yfinance
-    stock = yf.Ticker(ticker_symbol)
-    # Retrieve historical data for the past 5 days
-    hist = stock.history(period="5d")
+    # Build the request URL and parameters for Alpha Vantage
+    url = 'https://www.alphavantage.co/query'
+    params = {
+        'function': 'TIME_SERIES_DAILY',
+        'symbol': ticker_symbol,
+        'apikey': ALPHA_VANTAGE_API_KEY
+    }
     
-    # Return the data as a JSON response
-    return jsonify(hist.to_dict())
+    response = requests.get(url, params=params)
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch data from Alpha Vantage'}), 500
+    
+    # Return the JSON response from Alpha Vantage
+    return jsonify(response.json())
 
 if __name__ == '__main__':
     app.run(debug=True)
