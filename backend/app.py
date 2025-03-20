@@ -15,11 +15,16 @@ def fetch_stock():
     data = request.get_json()
     ticker_symbol = data.get('ticker', 'AAPL')
     
+    #HARD CODED CURRENCIES
+    from_currency = 'USD'
+    to_currency = 'DKK'
+
     # Build the request URL and parameters for Alpha Vantage
     url = 'https://www.alphavantage.co/query'
     params = {
-        'function': 'TIME_SERIES_DAILY',
-        'symbol': ticker_symbol,
+        'function': 'CURRENCY_EXCHANGE_RATE',
+        'from_currency': from_currency,
+        'to_currency': to_currency,
         'apikey': ALPHA_VANTAGE_API_KEY
     }
     
