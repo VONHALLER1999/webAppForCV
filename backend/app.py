@@ -13,11 +13,14 @@ ALPHA_VANTAGE_API_KEY = os.environ.get('ALPHA_VANTAGE_API_KEY')
 @app.route('/api/fetch', methods=['POST'])
 def fetch_stock():
     data = request.get_json()
-    ticker_symbol = data.get('ticker', 'AAPL')
+    ticker_symbol = data.get('Exposure', 1000000)
     
     #HARD CODED CURRENCIES
     from_currency = 'USD'
     to_currency = 'DKK'
+    
+    
+
 
     # Build the request URL and parameters for Alpha Vantage
     url = 'https://www.alphavantage.co/query'
