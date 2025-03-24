@@ -66,9 +66,25 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
 
     # --- Summary Statistics ---
     summary_stats = {
-        'unhedged': {'mean': np.mean(unhedged_revenue), 'std': np.std(unhedged_revenue)},
-        'forward': {'revenue': forward_revenue},
-        'option': {'mean': np.mean(option_revenue), 'std': np.std(option_revenue)}
+        'unhedged': {
+            'mean': np.mean(unhedged_revenue), 
+            'std': np.std(unhedged_revenue),
+            'median': np.median(unhedged_revenue),
+            'var_95': np.percentile(unhedged_revenue, 5),  # 95% VaR
+            'min': np.min(unhedged_revenue),
+            'max': np.max(unhedged_revenue)
+        },
+        'forward': {
+            'revenue': forward_revenue
+        },
+        'option': {
+            'mean': np.mean(option_revenue), 
+            'std': np.std(option_revenue),
+            'median': np.median(option_revenue),
+            'var_95': np.percentile(option_revenue, 5),  # 95% VaR
+            'min': np.min(option_revenue),
+            'max': np.max(option_revenue)
+        }
     }
 
     return {

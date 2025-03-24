@@ -1,7 +1,6 @@
-
-import { useState } from "react";
-import HistogramSingle from "./HistogramSingle";
-import HistogramGroup from "./HistogramGroup";
+import { useState, useMemo } from "react";
+import HistogramSingle from "./HistogramSingle.tsx";
+import HistogramGroup from "./HistogramGroup.tsx";
 import React from "react";
 
 
@@ -12,31 +11,37 @@ type CombinedHistogramProps = {
   unhedged: number[];
   option: number[];
 };
+export const CombinedHistogram = ({ width, height, unhedged, option }: CombinedHistogramProps) => {
 
-export const CombinedHistogram = ({
-  width,
-  height,
-  unhedged,
-  option,
-}: CombinedHistogramProps) => {
-  // mode can be "unhedged", "option", or "both"
   const [mode, setMode] = useState<"unhedged" | "option" | "both">("both");
 
+  // Calculate shared domain for consistent scaling
+  const domain = useMemo(() => {
+    const allValues = [...unhedged, ...option];
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    return [min, max] as [number, number];
+  }, [unhedged, option]);
+
   const renderHistogram = () => {
+    const sharedProps = {
+      width,
+      height,
+      domain
+    };
+
     if (mode === "both") {
-      // Build groups array from the two datasets.
       const groups = [
-        { name: "Unhedged", values: unhedged },
-        { name: "Option", values: option },
+        { name: "Unhedged", values: unhedged, id: "unhedged" },
+        { name: "Option", values: option, id: "option" },
       ];
-      return <HistogramGroup width={width} height={height} data={groups} />;
+      return <HistogramGroup {...sharedProps} data={groups} />;
     } else if (mode === "unhedged") {
-      return <HistogramSingle width={width} height={height} data={unhedged} />;
+      return <HistogramSingle {...sharedProps} data={unhedged} groupId="unhedged" />;
     } else if (mode === "option") {
-      return <HistogramSingle width={width} height={height} data={option} />;
+      return <HistogramSingle {...sharedProps} data={option} groupId="option" />;
     }
   };
-
   const buttonStyle = {
     border: "1px solid #9a6fb0",
     borderRadius: "3px",
@@ -60,7 +65,9 @@ export const CombinedHistogram = ({
           Both
         </button>
       </div>
-      {renderHistogram()}
+      <div style={{ position: 'relative', width, height }}>
+        {renderHistogram()}
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
-import { Rectangle } from "./Rectangle";
+import Rectangle from "./Rectangle.tsx";
 import React from "react";
 
 const MARGIN = { top: 30, right: 30, bottom: 40, left: 50 };
@@ -11,18 +11,21 @@ type HistogramSingleProps = {
   width: number;
   height: number;
   data: number[];
+  domain: [number, number];
+  groupId: string; // Add this prop
 };
 
-export const HistogramSingle = ({ width, height, data }: HistogramSingleProps) => {
+export const HistogramSingle = ({ width, height, data, domain, groupId }: HistogramSingleProps) => {
   const axesRef = useRef(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
-
-  // You can adjust the domain or make it dynamic if needed.
-  const domain: [number, number] = [0, 100];
-  const xScale = useMemo(() => {
-    return d3.scaleLinear().domain(domain).range([10, boundsWidth]);
-  }, [data, width]);
+    // Remove the domain calculation and use the prop directly
+    const xScale = useMemo(() => {
+      return d3.scaleLinear()
+        .domain(domain)
+        .range([10, boundsWidth])
+        .nice();
+    }, [domain, boundsWidth]);
 
   const buckets = useMemo(() => {
     const bucketGenerator = d3
@@ -58,7 +61,7 @@ export const HistogramSingle = ({ width, height, data }: HistogramSingleProps) =
     if (x0 === undefined || x1 === undefined) return null;
     return (
       <Rectangle
-        key={i}
+        key={`${groupId}_${i}`} // Use consistent key structure
         x={xScale(x0) + BUCKET_PADDING / 2}
         width={xScale(x1) - xScale(x0) - BUCKET_PADDING}
         y={yScale(bucket.length)}

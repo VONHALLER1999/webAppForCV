@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import React from "react";
+import Rectangle from "./Rectangle.tsx";  // Add this import
 
 const MARGIN = { top: 30, right: 30, bottom: 40, left: 50 };
 const BUCKET_NUMBER = 70;
 const BUCKET_PADDING = 4;
 const COLORS = ["#e0ac2b", "#e85252", "#6689c6", "#9a6fb0", "#a53253"];
 
-type Group = { name: string; values: number[] };
+type Group = { name: string; values: number[]; id: string }; // Add id to Group type
 type HistogramGroupProps = {
   width: number;
   height: number;
   data: Group[];
+  domain: [number, number];
 };
 
-export const HistogramGroup = ({ width, height, data }: HistogramGroupProps) => {
+
+export const HistogramGroup = ({ width, height, data, domain }: HistogramGroupProps) => {
   const axesRef = useRef(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
@@ -25,11 +28,12 @@ export const HistogramGroup = ({ width, height, data }: HistogramGroupProps) => 
     .domain(allGroupNames)
     .range(COLORS);
 
-  const xScale = useMemo(() => {
-    const maxPerGroup = data.map((group) => Math.max(...group.values));
-    const max = Math.max(...maxPerGroup);
-    return d3.scaleLinear().domain([0, max]).range([10, boundsWidth]).nice();
-  }, [data, width]);
+    const xScale = useMemo(() => {
+      return d3.scaleLinear()
+        .domain(domain)
+        .range([10, boundsWidth])
+        .nice();
+    }, [domain, boundsWidth]);
 
   const bucketGenerator = useMemo(() => {
     return d3
@@ -41,7 +45,7 @@ export const HistogramGroup = ({ width, height, data }: HistogramGroupProps) => 
 
   const groupBuckets = useMemo(() => {
     return data.map((group) => {
-      return { name: group.name, buckets: bucketGenerator(group.values) };
+      return { name: group.name, id: group.id, buckets: bucketGenerator(group.values) };
     });
   }, [data, bucketGenerator]);
 
@@ -74,10 +78,9 @@ export const HistogramGroup = ({ width, height, data }: HistogramGroupProps) => 
       const { x0, x1 } = bucket;
       if (x0 === undefined || x1 === undefined) return null;
       return (
-        <rect
-          key={`${i}_${j}`}
+        <Rectangle
+          key={`${group.id}_${j}`} // Use consistent key structure
           fill={colorScale(group.name)}
-          opacity={0.7}
           x={xScale(x0) + BUCKET_PADDING / 2}
           width={xScale(x1) - xScale(x0) - BUCKET_PADDING}
           y={yScale(bucket.length)}

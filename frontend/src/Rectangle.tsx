@@ -6,39 +6,42 @@ type RectangleProps = {
   height: number;
   x: number;
   y: number;
+  fill?: string;
 };
 
-export const Rectangle = (props: RectangleProps) => {
-  const { x, y, width, height } = props;
+const AnimatedRect = animated("rect") as unknown as React.FC<
+  React.SVGProps<SVGRectElement> & {
+    x: string | number;
+    y: string | number;
+    width: string | number;
+    height: string | number;
+  }
+>;
 
+export const Rectangle = (props: RectangleProps) => {
+  const { x, y, width, height, fill = "#9d174d" } = props;
   const springProps = useSpring({
     to: { x, y, width, height },
+    from: { x, y: y + height, width, height: 0 },
     config: { friction: 30 },
     delay: x,
   });
-
-  // Cast animated.rect to a component that accepts x, y, width, and height as either a number or a spring value.
-  const AnimatedRect = animated.rect as React.FC<
-    React.SVGProps<SVGRectElement> & {
-      x: number | typeof springProps.x;
-      y: number | typeof springProps.y;
-      width: number | typeof springProps.width;
-      height: number | typeof springProps.height;
-    }
-  >;
+  
 
   return (
     <AnimatedRect
-      x={springProps.x as any}
-      y={springProps.y as any}
-      width={springProps.width as any}
-      height={springProps.height as any}
+      x={springProps.x as unknown as number}
+      y={springProps.y as unknown as number}
+      width={springProps.width as unknown as number}
+      height={springProps.height as unknown as number}
       opacity={0.7}
-      stroke="#9d174d"
-      fill="#9d174d"
+      stroke={fill}
+      fill={fill}
       fillOpacity={0.3}
       strokeWidth={1}
       rx={1}
     />
   );
 };
+
+export default Rectangle;
