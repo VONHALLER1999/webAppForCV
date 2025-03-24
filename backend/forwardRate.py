@@ -29,7 +29,7 @@ def get_dkk_forward_rate(maturity_months):
 
     # 1. Spot rate: USD/DKK
     spot_data = yf.download("USDDKK=X", period="1d", interval="1d", auto_adjust=False, progress=False)
-    spot_rate = spot_data["Close"].iloc[-1].item()  # convert to scalar float
+    spot_rate = spot_data["Close"].iloc[-1]  # convert to scalar float
 
     # 2. USD interest rate from FRED (converted from percentage to decimal)
     fred = Fred(api_key=FRED_API)
