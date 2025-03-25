@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import HedgingSimulator from '../HedgingSimulator';
+import logo from '../assets/logo.png';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen, setIsPanelOpen] = useState(false); // Change default to false
 
   return (
     <div className="app-container">
       <header className="global-header">
         <div className="header-content">
-          <h1>Currency Risk Management</h1>
+          <div className="header-left">
+            <img src={logo} alt="Currency Risk Management" className="header-logo" />
+            <h1>Currency Risk Management</h1>
+          </div>
           <div className="author-info">
             <p>Built by Vilhelm Grønbæk</p>
             <div className="social-links">

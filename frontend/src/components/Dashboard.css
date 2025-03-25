@@ -39,6 +39,7 @@
   align-items: center;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .global-header h1 {
@@ -372,4 +373,28 @@
 .info-panel-content p,
 .info-panel-content li {
   color: var(--text-light);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  height: 32px;
+  width: auto;
+}
+
+/* Update media query for mobile */
+@media (max-width: 768px) {
+  .header-left {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .header-logo {
+    height: 28px;
+  }
 }
