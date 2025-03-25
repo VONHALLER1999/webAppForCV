@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS to allow requests from your React app
+CORS(app, origins=["https://shark-app-9x7u9.ondigitalocean.app"])
 
 @app.route('/api/fetch', methods=['POST'])
 def simulate_hedges():
