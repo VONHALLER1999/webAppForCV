@@ -1,16 +1,17 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
+
+RUN apt-get update \
+    && apt-get install -y python3-distutils \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy and install backend dependencies
-COPY requirements.txt ./requirements.txt
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend application code
 COPY . .
 
-# Expose the port the app runs on
 EXPOSE 4000
 
-# Command to run the application
 CMD ["python", "app.py"]
