@@ -24,6 +24,6 @@ COPY backend/ ./backend/
 # Copy Supervisor configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 5000 3000
+EXPOSE 8080 3000
 
 CMD ["/usr/bin/supervisord", "-n"]
