@@ -15,6 +15,6 @@ RUN pip install --upgrade pip setuptools wheel && \
 # Copy the rest of your app's code.
 COPY . .
 
-EXPOSE 4000
+EXPOSE 4000 4000
 
 CMD ["python", "app.py"]
