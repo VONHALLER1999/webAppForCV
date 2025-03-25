@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CombinedHistogram from './CombinedHistogram.tsx';
 import './components/HedgingSimulator.css';
 
+
 function HedgingSimulator() {
   const [months, setMonths] = useState(6);
   const [exposure, setExposure] = useState(1000000);
@@ -29,7 +30,7 @@ function HedgingSimulator() {
     setJsonData(null);
     setLoading(true);
     try {
-      const response = await fetch('/api/fetch', {
+      const response = await fetch(`https://shark-app-9x7u9.ondigitalocean.app/api/fetch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ months, exposure, num_simulations: numSimulations }),
