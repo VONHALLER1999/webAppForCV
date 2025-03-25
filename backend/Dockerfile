@@ -1,18 +1,18 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
 
-# Install required system packages and python3-setuptools, then upgrade pip and setuptools.
+# Update package lists and install required system packages.
 RUN apt-get update && \
-    apt-get install -y python3-distutils python3-dev build-essential python3-setuptools && \
+    apt-get install -y python3-distutils python3-dev build-essential && \
     rm -rf /var/lib/apt/lists/*
-
-RUN pip install --upgrade pip setuptools
 
 WORKDIR /app
 
+# Copy requirements and upgrade pip, setuptools, and wheel.
 COPY requirements.txt .
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
-
+# Copy the rest of your app's code.
 COPY . .
 
 EXPOSE 4000
