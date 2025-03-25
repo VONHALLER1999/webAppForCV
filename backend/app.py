@@ -27,6 +27,9 @@ def simulate_hedges():
     }
     return jsonify(response_data)
 
+@app.route("/")
+def index():
+    return "Hello from the backend!"
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
