@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import HistogramSingle from "./HistogramSingle.tsx";
 import HistogramGroup from "./HistogramGroup.tsx";
 import React from "react";
-
+import "./CombinedHistogram.css";
 
 // Assume these two datasets are coming from your backend response
 type CombinedHistogramProps = {
@@ -42,26 +42,26 @@ export const CombinedHistogram = ({ width, height, unhedged, option }: CombinedH
       return <HistogramSingle {...sharedProps} data={option} groupId="option" />;
     }
   };
-  const buttonStyle = {
-    border: "1px solid #9a6fb0",
-    borderRadius: "3px",
-    padding: "0px 8px",
-    margin: "10px 2px",
-    fontSize: 14,
-    color: "#9a6fb0",
-    opacity: 0.7,
-  };
 
   return (
-    <div>
-      <div style={{ marginBottom: "10px" }}>
-        <button style={buttonStyle} onClick={() => setMode("unhedged")}>
+    <div className="histogram-container">
+      <div className="button-group">
+        <button 
+          className={`histogram-button ${mode === "unhedged" ? "active" : ""}`} 
+          onClick={() => setMode("unhedged")}
+        >
           Unhedged Revenue
         </button>
-        <button style={buttonStyle} onClick={() => setMode("option")}>
+        <button 
+          className={`histogram-button ${mode === "option" ? "active" : ""}`}
+          onClick={() => setMode("option")}
+        >
           Option Revenue
         </button>
-        <button style={buttonStyle} onClick={() => setMode("both")}>
+        <button 
+          className={`histogram-button ${mode === "both" ? "active" : ""}`}
+          onClick={() => setMode("both")}
+        >
           Both
         </button>
       </div>

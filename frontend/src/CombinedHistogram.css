@@ -1,0 +1,87 @@
+.histogram-container {
+  background: var(--card-dark);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.histogram-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--card-dark);
+  color: var(--text-light);
+  border: 2px solid var(--accent-color);
+}
+
+.histogram-button:hover {
+  background: var(--accent-color);
+  color: var(--background-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(224, 172, 43, 0.3);
+}
+
+.histogram-button.active {
+  background: var(--accent-color);
+  color: var(--background-dark);
+  box-shadow: 0 4px 12px rgba(224, 172, 43, 0.3);
+}
+
+/* Button-specific colors */
+.histogram-button:nth-child(1) {
+  border-color: var(--accent-color);
+}
+
+.histogram-button:nth-child(2) {
+  border-color: var(--primary-color);
+}
+
+.histogram-button:nth-child(2):hover,
+.histogram-button:nth-child(2).active {
+  background: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(102, 137, 198, 0.3);
+}
+
+.histogram-button:nth-child(3) {
+  border-color: var(--secondary-color);
+}
+
+.histogram-button:nth-child(3):hover,
+.histogram-button:nth-child(3).active {
+  background: var(--secondary-color);
+  box-shadow: 0 4px 12px rgba(154, 111, 176, 0.3);
+}
+
+.axis-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.legend text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Style the axis lines and ticks */
+.domain,
+.tick line {
+  stroke: var(--text-dim);
+}
+
+.tick text {
+  fill: var(--text-dim);
+  font-size: 11px;
+}

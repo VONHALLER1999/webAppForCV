@@ -71,7 +71,52 @@ export const HistogramGroup = ({ width, height, data, domain }: HistogramGroupPr
 
     const yAxisGenerator = d3.axisLeft(yScale);
     svgElement.append("g").call(yAxisGenerator);
-  }, [xScale, yScale, boundsHeight]);
+
+    // Add X axis label
+    svgElement
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", boundsWidth / 2)
+      .attr("y", boundsHeight + MARGIN.bottom - 5)
+      .text("Revenue (DKK)")
+      .style("fill", "var(--text-light)");
+
+    // Add Y axis label
+    svgElement
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("transform", `translate(${-MARGIN.left + 15},${boundsHeight / 2}) rotate(-90)`)
+      .text("Frequency")
+      .style("fill", "var(--text-light)");
+
+    // Add legend
+    const legend = svgElement
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${boundsWidth - 100}, 0)`);
+
+    data.forEach((group, i) => {
+      const legendRow = legend
+        .append("g")
+        .attr("transform", `translate(0, ${i * 20})`);
+
+      legendRow
+        .append("rect")
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("fill", colorScale(group.name));
+
+      legendRow
+        .append("text")
+        .attr("x", 20)
+        .attr("y", 12)
+        .text(group.name)
+        .style("fill", "var(--text-light)")
+        .style("font-size", "12px");
+    });
+  }, [xScale, yScale, boundsHeight, boundsWidth, data, colorScale]);
 
   const allRects = groupBuckets.map((group, i) =>
     group.buckets.map((bucket, j) => {

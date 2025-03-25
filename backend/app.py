@@ -16,11 +16,7 @@ def simulate_hedges():
     
     # Run the simulation.
     results = simulate_hedging_strategy(months, exposure, num_simulations)
-    # print the median revenue
-    unhedged_median = np.median(np.array(results["unhedged_revenue"]))
-    print(f"unhedged Median: {unhedged_median}")
-    option_median = np.median(np.array(results["option_revenue"]))
-    print(f"option Median: {option_median}")
+
     # Convert arrays to lists for JSON serialization.
     response_data = {
         "forward_revenue": results["forward_revenue"],

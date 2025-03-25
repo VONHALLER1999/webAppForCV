@@ -54,7 +54,26 @@ export const HistogramSingle = ({ width, height, data, domain, groupId }: Histog
 
     const yAxisGenerator = d3.axisLeft(yScale);
     svgElement.append("g").call(yAxisGenerator);
-  }, [xScale, yScale, boundsHeight]);
+
+    // Add X axis label
+    svgElement
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", boundsWidth / 2)
+      .attr("y", boundsHeight + MARGIN.bottom - 5)
+      .text("Revenue (DKK)")
+      .style("fill", "var(--text-light)");
+
+    // Add Y axis label
+    svgElement
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("transform", `translate(${-MARGIN.left + 15},${boundsHeight / 2}) rotate(-90)`)
+      .text("Frequency")
+      .style("fill", "var(--text-light)");
+  }, [xScale, yScale, boundsHeight, boundsWidth]);
 
   const allRects = buckets.map((bucket, i) => {
     const { x0, x1 } = bucket;
