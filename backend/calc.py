@@ -5,8 +5,149 @@ import matplotlib.pyplot as plt
 from garch import run_garch_simulation
 from forwardRate import get_dkk_forward_rate
 from sparnordOptions import option_products, scale_option_product
+from flask_socketio import SocketIO
+import os
+from datetime import datetime
+import json
+import sys
+import time
+sys.setrecursionlimit(10000)  # Increase recursion limit for YFinance
 
-def simulate_hedging_strategy(months, exposure, num_simulations):
+def emit_status(socketio, message):
+    """Helper function to emit status updates within application context"""
+    try:
+        socketio.emit('status_update', {'message': message})
+    except Exception as e:
+        print(f"Error sending status update: {str(e)}")
+
+def get_fx_data(socketio, required_start_date='2018-01-01'):
+    """Get FX data from local cache or download from YFinance in chunks"""
+    cache_dir = 'data_cache'
+    cache_file = os.path.join(cache_dir, 'fx_data.csv')
+    metadata_file = os.path.join(cache_dir, 'metadata.json')
+    
+    # Create cache directory if it doesn't exist
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    
+    # Convert string dates to datetime objects
+    current_date = datetime.now()
+    required_start = datetime.strptime(required_start_date, '%Y-%m-%d')
+    need_download = True
+    start_date = required_start_date
+    
+    # Check existing cache
+    if os.path.exists(cache_file) and os.path.exists(metadata_file):
+        try:
+            with open(metadata_file, 'r') as f:
+                metadata = json.load(f)
+                
+            # Load existing data with explicit format
+            existing_data = pd.read_csv(cache_file)
+            # Convert index to datetime after loading
+            existing_data.index = pd.to_datetime(existing_data.index)
+            
+            if not existing_data.empty:
+                data_start = existing_data.index.min()
+                data_end = existing_data.index.max()
+                
+                # Check if we have all the data we need
+                if data_start <= required_start and (current_date - data_end).days <= 1:
+                    emit_status(socketio, 'Using cached FX data...')
+                    need_download = False
+                else:
+                    # Only download missing data
+                    if data_start <= required_start:
+                        start_date = (data_end + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+                        emit_status(socketio, 
+                            f'Downloading missing data from {start_date} to {current_date.strftime("%Y-%m-%d")}...')
+        except Exception as e:
+            emit_status(socketio, f'Error reading cache: {str(e)}')
+            need_download = True
+    
+    if need_download:
+        ticker = 'DKKUSD=X'
+        
+        try:
+            emit_status(socketio, 
+                f'Downloading FX data from {start_date} to {current_date.strftime("%Y-%m-%d")}...')
+            
+            # Download data in 3-month chunks to avoid recursion
+            chunk_size = pd.DateOffset(months=3)
+            chunk_start = pd.to_datetime(start_date)
+            chunk_end = current_date
+            all_chunks = []
+            
+            while chunk_start < chunk_end:
+                next_chunk = min(chunk_start + chunk_size, chunk_end)
+                emit_status(socketio, 
+                    f'Downloading chunk {chunk_start.strftime("%Y-%m-%d")} to {next_chunk.strftime("%Y-%m-%d")}...')
+                
+                for attempt in range(3):  # Try each chunk up to 3 times
+                    try:
+                        chunk_data = yf.download(
+                            ticker,
+                            start=chunk_start.strftime('%Y-%m-%d'),
+                            end=next_chunk.strftime('%Y-%m-%d'),
+                            progress=False,
+                            auto_adjust=True
+                        )
+                        if not chunk_data.empty:
+                            all_chunks.append(chunk_data)
+                            break
+                    except Exception as e:
+                        if attempt < 2:  # If not last attempt
+                            time.sleep(10)  # Wait 10 seconds before retry
+                            continue
+                        else:
+                            emit_status(socketio, 
+                                f'Failed to download chunk {chunk_start.strftime("%Y-%m-%d")}')
+                
+                chunk_start = next_chunk
+            
+            if all_chunks:
+                new_data = pd.concat(all_chunks)
+                new_data = new_data[~new_data.index.duplicated(keep='last')]
+                new_data.sort_index(inplace=True)
+                
+                if os.path.exists(cache_file):
+                    # Merge with existing data
+                    existing_data = pd.read_csv(cache_file, index_col=0, parse_dates=True)
+                    combined_data = pd.concat([existing_data, new_data])
+                    combined_data = combined_data[~combined_data.index.duplicated(keep='last')]
+                    combined_data.sort_index(inplace=True)
+                    data = combined_data
+                else:
+                    data = new_data
+                
+                # Save updated data
+                data.to_csv(cache_file)
+                metadata = {
+                    'last_update': current_date.strftime('%Y-%m-%d'),
+                    'ticker': ticker,
+                    'start_date': data.index.min().strftime('%Y-%m-%d'),
+                    'end_date': data.index.max().strftime('%Y-%m-%d')
+                }
+                with open(metadata_file, 'w') as f:
+                    json.dump(metadata, f)
+                
+                emit_status(socketio, 'FX data updated successfully')
+            else:
+                raise Exception('Failed to download any data')
+                
+        except Exception as e:
+            emit_status(socketio, f'Error downloading data: {str(e)}')
+            if os.path.exists(cache_file):
+                emit_status(socketio, 'Using existing cached data...')
+                data = pd.read_csv(cache_file, index_col=0, parse_dates=True)
+            else:
+                raise Exception('No cached data available and download failed')
+    else:
+        data = pd.read_csv(cache_file, index_col=0, parse_dates=True)
+
+    return data
+
+def simulate_hedging_strategy(months, exposure, num_simulations, socketio):
     """
     Simulate hedging strategies for a USD/DKK exposure using a GARCH simulation model.
 
@@ -23,11 +164,15 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
             - option_revenue: Revenue outcomes for the option hedge scenario.
             - summary_stats: Summary statistics (means and standard deviations) for the scenarios.
     """
-    # --- Data Collection ---
-    start_date = '2018-01-01'
-    end_date   = '2025-03-01'
-    ticker = 'DKKUSD=X'
-    data = yf.download(ticker, start=start_date, end=end_date)
+    # Send initial status
+    emit_status(socketio, 'Starting simulation process...')
+    
+    # Calculate required start date based on historical data needed for GARCH
+    required_years_of_data = 5  # Adjust based on your GARCH model requirements
+    required_start_date = (datetime.now() - pd.DateOffset(years=required_years_of_data)).strftime('%Y-%m-%d')
+    
+    # Get FX data with specific start date
+    data = get_fx_data(socketio, required_start_date)
     
     # Use the "Close" price and convert from USD per DKK to DKK per USD.
     fx_rate = data['Close'].dropna()
@@ -48,8 +193,23 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
     premium_per_usd_in_DKK = (option_scaled['premium'] / option_scaled['notional']) * S0
 
     # --- Run GARCH Simulation ---
-    simulated_garch_st = run_garch_simulation(data, n_sims=num_simulations, n_days=days)
+    emit_status(socketio, 'Starting GARCH simulations...')
+    
+    # Initialize array for storing simulation results
+    simulated_garch_st = np.zeros(num_simulations)
+    
+    # Run simulations in batches of 100
+    batch_size = 100
+    for i in range(0, num_simulations, batch_size):
+        batch_results = run_garch_simulation(data, n_sims=batch_size, n_days=days)
+        simulated_garch_st[i:i+batch_size] = batch_results
+        
+        # Calculate and send progress update
+        progress = min((i + batch_size) / num_simulations * 100, 100)
+        emit_status(socketio, f'Completed {i + batch_size}/{num_simulations} simulations ({progress:.1f}%)')
 
+    emit_status(socketio, 'Calculating hedging strategies...')
+    
     # --- Calculate Hedging Strategy Outcomes ---
     # Unhedged scenario: No hedge applied.
     unhedged_revenue = exposure * simulated_garch_st
@@ -87,6 +247,8 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
         }
     }
 
+    emit_status(socketio, 'Simulation complete! Processing results...')
+    
     return {
         "simulated_garch_st": simulated_garch_st,
         "unhedged_revenue": unhedged_revenue,

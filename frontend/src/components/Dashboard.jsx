@@ -3,8 +3,62 @@ import HedgingSimulator from '../HedgingSimulator';
 import logo from '../assets/logo.png';
 import './Dashboard.css';
 
+const API_URL = 'http://localhost:5001';
+
 const Dashboard = () => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false); // Change default to false
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [simulationResults, setSimulationResults] = useState(null);
+  const [months, setMonths] = useState(6);
+  const [exposure, setExposure] = useState(1000000);
+  const [numSimulations, setNumSimulations] = useState(10000);
+
+  const handleSimulate = async () => {
+    try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${API_URL}/api/simulate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                months: parseFloat(months),
+                exposure: parseFloat(exposure),
+                num_simulations: parseInt(numSimulations)
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch data');
+        }
+
+        const data = await response.json();
+        setSimulationResults(data);
+    } catch (error) {
+        console.error('Simulation error:', error);
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  // Pass these states to HedgingSimulator
+  const simulatorProps = {
+    loading,
+    error,
+    simulationResults,
+    months,
+    setMonths,
+    exposure,
+    setExposure,
+    numSimulations,
+    setNumSimulations,
+    onSimulate: handleSimulate
+  };
 
   return (
     <div className="app-container">
@@ -25,7 +79,7 @@ const Dashboard = () => {
 
       <div className="dashboard-container">
         <div className={`simulator-panel ${isPanelOpen ? 'sidebar-open' : ''}`}>
-          <HedgingSimulator />
+          <HedgingSimulator {...simulatorProps} />
         </div>
         <div className={`info-panel ${isPanelOpen ? 'open' : 'closed'}`}>
           <button 
