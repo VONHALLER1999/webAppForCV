@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/
 
 # Copy Supervisor configuration
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf 
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["/usr/bin/supervisord", "-n"]
