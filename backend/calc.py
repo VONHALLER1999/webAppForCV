@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
-import yfinance as yf
 import matplotlib.pyplot as plt
 from garch import run_garch_simulation
 from forwardRate import get_dkk_forward_rate
 from sparnordOptions import option_products, scale_option_product
+from data_loader import get_stock_data
 
 def simulate_hedging_strategy(months, exposure, num_simulations):
     """
@@ -27,8 +27,9 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
     start_date = '2018-01-01'
     end_date   = '2025-03-01'
     ticker = 'DKKUSD=X'
-    data = yf.download(ticker, start=start_date, end=end_date)
-    
+    # Replace yf.download with get_stock_data
+    data = get_stock_data(ticker, start_date=start_date, end_date=end_date)
+
     # Use the "Close" price and convert from USD per DKK to DKK per USD.
     fx_rate = data['Close'].dropna()
     fx_rate_dkk_per_usd = 1 / fx_rate

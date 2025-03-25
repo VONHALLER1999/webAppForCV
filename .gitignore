@@ -26,3 +26,4 @@ yarn-error.log*
 __pycache__/
 *.pyc
 /data_cache
+backend/data_cache/
