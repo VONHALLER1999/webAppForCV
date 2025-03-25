@@ -29,14 +29,10 @@ function HedgingSimulator() {
     setJsonData(null);
     setLoading(true);
     try {
-      const response = await fetch('/api/fetch', {
+      const response = await fetch('http://localhost:4000/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          months: months,
-          exposure: exposure,
-          num_simulations: numSimulations,
-        }),
+        body: JSON.stringify({ months, exposure, num_simulations: numSimulations }),
       });
       if (!response.ok) {
         throw new Error('Network response was not ok');
