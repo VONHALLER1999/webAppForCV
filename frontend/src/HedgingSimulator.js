@@ -30,11 +30,11 @@ function HedgingSimulator() {
     setJsonData(null);
     setLoading(true);
     try {
-      const response = await fetch(`https://shark-app-9x7u9.ondigitalocean.app/api/fetch`, {
+      const response = await fetch('https://shark-app-9x7u9.ondigitalocean.app/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ months, exposure, num_simulations: numSimulations }),
-      });
+      });      
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 CORS(app, origins=["https://shark-app-9x7u9.ondigitalocean.app"])
 
-@app.route('/api/fetch', methods=['POST'])
+@app.route('/fetch', methods=['POST'])
 def simulate_hedges():
     # Extract simulation parameters from the POST request.
     data = request.get_json()
@@ -32,6 +32,6 @@ def index():
     return "Hello from the backend!"
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 4000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
 
