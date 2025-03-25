@@ -4,8 +4,8 @@ import Rectangle from "./Rectangle.tsx";
 import React from "react";
 
 const MARGIN = { top: 30, right: 30, bottom: 40, left: 50 };
-const BUCKET_NUMBER = 70;
-const BUCKET_PADDING = 4;
+const BUCKET_NUMBER = 50;
+const BUCKET_PADDING = 2;
 
 type HistogramSingleProps = {
   width: number;

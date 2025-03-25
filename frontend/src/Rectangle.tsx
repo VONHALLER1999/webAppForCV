@@ -37,7 +37,7 @@ export const Rectangle = (props: RectangleProps) => {
       opacity={0.7}
       stroke={fill}
       fill={fill}
-      fillOpacity={0.3}
+      fillOpacity={0.7}
       strokeWidth={1}
       rx={1}
     />
