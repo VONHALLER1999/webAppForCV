@@ -24,8 +24,10 @@ def extract_dkk_interest_rate(xml_content):
     except Exception as e:
         raise Exception(f"Error parsing XML content: {e}")
 
-def get_dkk_forward_rate(maturity_months):
-    T = maturity_months 
+def get_dkk_forward_rate(maturity_months: float):
+    """Return the USD/DKK forward rate for the given maturity in months."""
+    # Convert months to a year fraction for the interest rate parity formula
+    T = maturity_months / 12
 
     # 1. Spot rate: USD/DKK
     spot_data = yf.download("USDDKK=X", period="1d", interval="1d", auto_adjust=False, progress=False)

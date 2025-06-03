@@ -40,7 +40,7 @@ def simulate_hedging_strategy(months, exposure, num_simulations):
     days = int(round(months * (365 / 12), 0))  # Convert months to days
     
     # Forward hedge parameters (in DKK per USD).
-    forward_rate = get_dkk_forward_rate(maturity_months=T)
+    forward_rate = get_dkk_forward_rate(maturity_months=months)
     
     # Scale the option product to the desired notional.
     desired_notional = exposure  
